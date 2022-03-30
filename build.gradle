@@ -21,8 +21,10 @@ plugins {
     id 'signing'
     id 'nebula.release' version '15.3.1'
     id 'jacoco'
-    id 'com.github.kt3k.coveralls' version '2.12.0'
     id "io.github.gradle-nexus.publish-plugin" version "1.1.0"
+    id 'net.wooga.snyk' version '0.10.0'
+    id "net.wooga.snyk-wdk-java" version "0.3.0"
+    id "net.wooga.cve-dependency-resolution" version "0.3.0"
 }
 
 group "com.wooga.spock.extensions"
@@ -34,7 +36,7 @@ if (cliTasks.contains("rc")) {
 }
 
 dependencies {
-    implementation ('org.spockframework:spock-core:1.2-groovy-2.4')
+    implementation ('org.spockframework:spock-core:1.3-groovy-2.5')
     api 'com.wooga.security:macos-security:[1.1,2)'
 }
 
