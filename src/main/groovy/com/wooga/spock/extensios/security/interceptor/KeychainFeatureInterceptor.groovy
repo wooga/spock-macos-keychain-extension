@@ -4,6 +4,7 @@ import com.wooga.security.MacOsKeychain
 import groovy.transform.InheritConstructors
 import org.spockframework.runtime.extension.IMethodInvocation
 import org.spockframework.runtime.model.FeatureInfo
+import org.spockframework.runtime.model.MethodInfo
 
 import java.lang.reflect.Parameter
 
@@ -12,30 +13,20 @@ class KeychainFeatureInterceptor extends KeychainInterceptor<FeatureInfo> {
 
     private MacOsKeychain currentKeychain
 
+    //Spock 2 does away with the unpredictable argument array size
+    //https://spockframework.org/spock/docs/2.3/extensions.html#_injecting_method_parameters
     private static void injectKeychain(IMethodInvocation invocation, MacOsKeychain keychain) {
         Map<Parameter, Integer> parameters = [:]
         invocation.method.reflection.parameters.eachWithIndex { parameter, i ->
             parameters << [(parameter): i]
         }
-        parameters = parameters.findAll { MacOsKeychain.equals it.key.type }
 
-        // enlarge arguments array if necessary
-        def lastMyInjectableParameterIndex = parameters*.value.max()
-        lastMyInjectableParameterIndex = lastMyInjectableParameterIndex == null ?
-                0 :
-                lastMyInjectableParameterIndex + 1
-
-        if (invocation.arguments.length < lastMyInjectableParameterIndex) {
-            def newArguments = new Object[lastMyInjectableParameterIndex]
-            System.arraycopy invocation.arguments, 0, newArguments, 0, invocation.arguments.length
-            invocation.arguments = newArguments
-        }
-
-        parameters.each { parameter, i ->
-            if (!invocation.arguments[i]) {
-                invocation.arguments[i] = keychain
-            }
-        }
+        parameters.findAll { MacOsKeychain.equals(it.key.type) }
+                .each { parameter, i ->
+                    if(!invocation.arguments[i] || invocation.arguments[i] == MethodInfo.MISSING_ARGUMENT) {
+                        invocation.arguments[i] = keychain
+                    }
+                }
     }
 
     //execute feature
